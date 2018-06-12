@@ -66,7 +66,6 @@
 
 <body style="background:#f5f5f5">
 
-
     <div style="background:#212121;width: 100%;padding-top: 2em;padding-bottom: 2em;">
         <div class="container">
             <div style="color:#eeeeee;">
@@ -74,21 +73,19 @@
                 <h3>私人秘密宝匣</h3>
                 <p>放入树洞的秘密仅自己可见，请妥善保管钱包私钥，若丢失以前放入的秘密将不能找回。</p>
                 <button type="button" class="btn btn-success  btn-lg" data-toggle="modal" data-target="#myModal">放入秘密</button>
+                <p></p>
+                <div id="wallter" class="alert alert-warning" role="alert" style="display: none;">
+                    <span>请安装钱包后使用：</span>
+                    <a href="https://github.com/ChengOrangeJu/WebExtensionWallet">安装钱包</a>
+                </div>
             </div>
         </div>
 
     </div>
 
     <div class="container">
-
-
         <ul class="timeline" id="timeline">
         </ul>
-
-
-
-
-
     </div>
 
     <!-- Modal -->
@@ -125,7 +122,7 @@
     <script type="text/JavaScript">       
 
         function formatDate(unixstamp) {
-            let now = new Date(+unixstamp);
+           let now = new Date(+unixstamp);
         　　var year = now.getFullYear(),
         　　month = now.getMonth() + 1,
         　　date = now.getDate(),
@@ -138,46 +135,50 @@
 
         $(function () {
 
-            // load data...
-            let api = new HoleContractApi();
-            api.get(resp => {
-                if (resp.result) {
-                    let tweets = JSON.parse(resp.result);
-                    if (tweets.length > 0) {
-                        tweets.sort((a, b) => a.date < b.date ? -1 : 1);
-                        let alt=0;
-                        for (const tweet of tweets) {                           
-                            tweet.sdate = formatDate(tweet.date);
-                            tweet.alt=alt;
-                            alt=alt+1;
-                            var tpl = document.getElementById('tpl').innerHTML;
-                            var html = template('tpl', tweet);
-                            $("#timeline").prepend(html);
+            let isExtensionExist = typeof (webExtensionWallet) !== "undefined";
+            if (!isExtensionExist) {
+                $("#wallter").show();                           
+            }else{
+                // load data...
+                let api = new HoleContractApi();
+                api.get(resp => {
+                    if (resp.result) {
+                        let tweets = JSON.parse(resp.result);
+                        if (tweets.length > 0) {
+                            tweets.sort((a, b) => a.date < b.date ? -1 : 1);
+                            let alt=0;
+                            for (const tweet of tweets) {                           
+                                tweet.sdate = formatDate(tweet.date);
+                                tweet.alt=alt;
+                                alt=alt+1;
+                                var tpl = document.getElementById('tpl').innerHTML;
+                                var html = template('tpl', tweet);
+                                $("#timeline").prepend(html);
+                            }
                         }
                     }
-                }
-            });
+                });
 
+                $("#putTweetBtn").click(()=>{
+                    let text = $("#tweetText").val();
+                    text=text.replace(/(^\s*)|(\s*$)/g, "");
+                    if(text == ''){
+                        alert("请输入内容...");
+                        return;
+                    }
+                    
+                    var tweet={};
+                    tweet.text=text;
+                    tweet.sdate="刚刚";
+                    var html = template('tpl',tweet);
+                    $("#timeline").prepend(html);
 
-            $("#putTweetBtn").click(()=>{
-                let text = $("#tweetText").val();
-                text=text.replace(/(^\s*)|(\s*$)/g, "");
-                if(text == ''){
-                    alert("请输入内容...");
-                    return;
-                }
+                    $('#myModal').modal('hide');
                 
-                var tweet={};
-                tweet.text=text;
-                tweet.sdate="刚刚";
-                var html = template('tpl',tweet);
-                $("#timeline").prepend(html);
+                    api.add(text);
 
-                $('#myModal').modal('hide');
-              
-                api.add(text);
-
-            });
+                });
+            }
         });
     </script>
 </body>
