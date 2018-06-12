@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Bootstrap 101 Template</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" media="all" href="css/styles.css">
+
+    <!-- HTML5 shim 和 Respond.js 是为了让 IE8 支持 HTML5 元素和媒体查询（media queries）功能 -->
+    <!-- 警告：通过 file:// 协议（就是直接将 html 页面拖拽到浏览器中）访问页面时 Respond.js 不起作用 -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script id="tpl" type="text/html">
+        {{ if alt%2==0}}
+        <li class="timeline-inverted ">
+            {{else}}
+            <li>
+        {{/if}}
+       
+                <div class="tl-circ"></div>
+                <div class="timeline-panel">
+                  <div class="tl-heading">                    
+                    <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i>{{sdate}}</small></p>
+                  </div>
+                  <div class="tl-body">
+                    <p>{{text}}</p>
+                    {{alt}}
+                  </div>
+                </div>
+              </li>
+    </script>
+
+    <style>
+        .alt {
+            background: #eeeeee;
+        }
+
+        .timeline li .tl-circ {
+            position: absolute;
+            top: 23px;
+            left: 50%;
+            text-align: center;
+            background: green;
+            color: #fff;
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
+            margin-left: -16px;
+            border: 3px solid #eeeeee;
+            border-top-right-radius: 50%;
+            border-top-left-radius: 50%;
+            border-bottom-right-radius: 50%;
+            border-bottom-left-radius: 50%;
+            z-index: 9;
+        }
+    </style>
+</head>
+
+<body style="background:#f5f5f5">
+
+
+    <div style="background:#212121;width: 100%;padding-top: 2em;padding-bottom: 2em;">
+        <div class="container">
+            <div style="color:#eeeeee;">
+                <h1>树洞</h1>
+                <p>放入树洞的秘密仅自己可见，请妥善保管钱包私钥，若丢失以前放入的秘密将不能找回。</p>
+                <button type="button" class="btn btn-success  btn-lg" data-toggle="modal" data-target="#myModal">放入秘密</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="container">
+
+
+        <ul class="timeline" id="timeline">
+        </ul>
+
+
+
+
+
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">秘密</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form">
+                        <div class="form-group">
+                            <textarea class="form-control" rows="10" id="tweetText"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="putTweetBtn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
+    <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+    <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="js/nebPay.js"></script>
+    <script src="js/contractApi.js"></script>
+    <script src="js/template-web.js"></script>
+    <script type="text/JavaScript">       
+
+        function formatDate(unixstamp) {
+            let now = new Date(+unixstamp);
+        　　var year = now.getFullYear(),
+        　　month = now.getMonth() + 1,
+        　　date = now.getDate(),
+        　　hour = now.getHours(),
+        　　minute = now.getMinutes(),
+        　　second = now.getSeconds();        
+        　　return year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + second;
+        }
+ 
+
+        $(function () {
+
+            // load data...
+            let api = new HoleContractApi();
+            api.get(resp => {
+                if (resp.result) {
+                    let tweets = JSON.parse(resp.result);
+                    if (tweets.length > 0) {
+                        tweets.sort((a, b) => a.date < b.date ? -1 : 1);
+                        let alt=0;
+                        for (const tweet of tweets) {                           
+                            tweet.sdate = formatDate(tweet.date);
+                            tweet.alt=alt;
+                            alt=alt+1;
+                            var tpl = document.getElementById('tpl').innerHTML;
+                            var html = template('tpl', tweet);
+                            $("#timeline").prepend(html);
+                        }
+                    }
+                }
+            });
+
+
+            $("#putTweetBtn").click(()=>{
+                let text = $("#tweetText").val();
+                text=text.replace(/(^\s*)|(\s*$)/g, "");
+                if(text == ''){
+                    alert("请输入内容...");
+                    return;
+                }
+                
+                var tweet={};
+                tweet.text=text;
+                tweet.sdate="刚刚";
+                var html = template('tpl',tweet);
+                $("#timeline").prepend(html);
+
+                $('#myModal').modal('hide');
+              
+                api.add(text);
+
+            });
+        });
+    </script>
+</body>
+
+</html>
