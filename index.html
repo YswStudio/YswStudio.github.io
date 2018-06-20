@@ -70,13 +70,14 @@
             <div style="color:#eeeeee;">
                 <h1>树洞</h1>
                 <h3>个人秘密保险柜</h3>
-                <p>放入树洞的秘密仅自己可见，请妥善保管钱包私钥，若丢失以前放入的秘密将不能找回。</p>
+                <p>放入树洞的秘密仅自己可见，请妥善保管钱包私钥，若丢失以前放入的秘密将不能找回。
+                    <a class="active" href="https://explorer.nebulas.io/#/address/n1prQyPucKTMnRrUG3za6Uw6XJoLbHJt1nW">合约代码</a></p>
                 <p>秘密成功提交，将<span class="label label-danger" style="margin-right: 1em">不可修改</span><span class="label label-danger">不可删除</span></p>
-                <button type="button" class="btn btn-success  btn-lg" data-toggle="modal" data-target="#myModal">放入秘密</button>
+                <button type="button" style="margin-top: 1em;width: 40%;" class="btn btn-success  btn-lg" id="btnShowDlg">放入秘密</button>
                 <p></p>
                 <div id="wallter" class="alert alert-warning" role="alert" style="display: none;">
-                    <span>请安装钱包后使用：</span>
-                    <a href="https://github.com/ChengOrangeJu/WebExtensionWallet">安装钱包</a>
+                    <span>请先安装钱包后使用：</span>
+                    <a href="https://github.com/ChengOrangeJu/WebExtensionWallet">安装钱包！</a>
                 </div>
             </div>
         </div>
@@ -90,7 +91,7 @@
 
     <!-- Modal -->
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -106,11 +107,42 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="putTweetBtn">保存</button>
+                    <p class="hide" id="pError"> 
+                        <span class="label label-danger">请输入内容...</span>
+                    </p>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="btnOk">保存</button>
                 </div>
             </div>
         </div>
     </div>
+
+
+     <div class="modal fade" id="modalAlert" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">消息</h4>
+                </div>
+                <div class="modal-body">
+                    <p>您确定存入本条秘密吗?</p>
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span>存入成功将:</span>
+                    <span class="label label-danger">不可编辑</span>
+                    <span class="label label-danger">不可删除</span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="putTweetBtn">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
     <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
     <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
@@ -159,24 +191,43 @@
                     }
                 });
 
-                $("#putTweetBtn").click(()=>{
+                // show dlg
+                $("#btnShowDlg").click(()=>{
+                    $('#myModal').modal();
+                });
+
+
+                $("#btnOk").click(()=>{
+
                     let text = $("#tweetText").val();
                     text=text.replace(/(^\s*)|(\s*$)/g, "");
                     if(text == ''){
-                        alert("请输入内容...");
+                        $('#pError').removeClass("hide");                      
+                        $('#pError').addClass("show");  
                         return;
                     }
-                    
-                    var tweet={};
+
+                    $('#pError').addClass("hide");                      
+                    $('#pError').removeClass("show");  
+
+
+                    $('#modalAlert').modal();                   
+                   
+
+                });
+
+
+                $("#putTweetBtn").click(()=>{
+                     var tweet={};
                     tweet.text=text;
                     tweet.sdate="刚刚";
                     var html = template('tpl',tweet);
                     $("#timeline").prepend(html);
 
                     $('#myModal').modal('hide');
+                    $('#modalAlert').modal('hide');
                 
                     api.add(text);
-
                 });
             }
         });

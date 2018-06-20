@@ -36,7 +36,14 @@ class HoleContract {
     }
 
     add(date, text) {
+
         let from = Blockchain.transaction.from;
+        let value = Blockchain.transaction.value;
+
+        if(value != 0){
+            throw new Error(`您不需要支付NAS，仅需要手续费.`); 
+        }
+
         let index = this.count;
 
         let tweet = new Tweet();
@@ -53,12 +60,13 @@ class HoleContract {
 
         this.count = new BigNumber(index).plus(1);
     }
+    
 
     get() {
         let from = Blockchain.transaction.from;
         let tweetIds = this.userTweetIndexs.get(from);
         if (!tweetIds) {
-            throw new Error(`Wallet = ${from} does not have any tweet `);
+            throw new Error(`钱包： ${from} 尚未存入秘密. `);
         }
 
         let arr = [];
