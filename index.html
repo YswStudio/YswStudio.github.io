@@ -218,16 +218,22 @@
 
 
                 $("#putTweetBtn").click(()=>{
-                     var tweet={};
-                    tweet.text=text;
-                    tweet.sdate="刚刚";
+ 
+                    var tweet = {};
+                    var text = $("#tweetText").val();
+                    tweet.text = text;
+
+                    tweet.sdate = "刚刚";
                     var html = template('tpl',tweet);
+                    
                     $("#timeline").prepend(html);
+
+                    api.add(text);
 
                     $('#myModal').modal('hide');
                     $('#modalAlert').modal('hide');
                 
-                    api.add(text);
+                    
                 });
             }
         });
