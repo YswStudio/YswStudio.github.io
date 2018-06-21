@@ -11,6 +11,7 @@
     <!-- Bootstrap -->
     <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" media="all" href="css/styles.css">
+    <link rel="stylesheet" type="text/css" media="all" href="css/stats.css">
 
     <!-- HTML5 shim 和 Respond.js 是为了让 IE8 支持 HTML5 元素和媒体查询（media queries）功能 -->
     <!-- 警告：通过 file:// 协议（就是直接将 html 页面拖拽到浏览器中）访问页面时 Respond.js 不起作用 -->
@@ -20,21 +21,20 @@
     <![endif]-->
     <script id="tpl" type="text/html">
         {{ if alt%2==0}}
-        <li class="timeline-inverted ">
-            {{else}}
+            <li class="timeline-inverted ">
+                {{else}}
             <li>
-        {{/if}}
-       
-                <div class="tl-circ"></div>
-                <div class="timeline-panel">
-                  <div class="tl-heading">                    
-                    <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i>{{sdate}}</small></p>
-                  </div>
-                  <div class="tl-body">
-                    <p>{{text}}</p>                    
-                  </div>
-                </div>
-              </li>
+        {{/if}}       
+        <div class="tl-circ"></div>
+        <div class="timeline-panel">
+            <div class="tl-heading">                    
+            <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i>{{sdate}}</small></p>
+            </div>
+            <div class="tl-body">
+            <p>{{text}}</p>                    
+            </div>
+        </div>
+        </li>
     </script>
 
     <style>
@@ -60,37 +60,91 @@
             border-bottom-left-radius: 50%;
             z-index: 9;
         }
+
+        #main {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+        }
     </style>
 </head>
 
-<body style="background:#f5f5f5">
-
-    <div style="background:#212121;width: 100%;padding-top: 2em;padding-bottom: 2em;">
+<body>
+    <div id="start" style="width: 100%;"></div>
+    <div id="main" style="width: 100%;padding-top: 2em;padding-bottom: 2em;">
         <div class="container">
             <div style="color:#eeeeee;">
-                <h1>树洞</h1>
-                <h3>个人秘密保险柜</h3>
-                <p>放入树洞的秘密仅自己可见，请妥善保管钱包私钥，若丢失以前放入的秘密将不能找回。
-                    <a class="active" href="https://explorer.nebulas.io/#/address/n1prQyPucKTMnRrUG3za6Uw6XJoLbHJt1nW">合约代码</a></p>
-                <p>秘密成功提交，将<span class="label label-danger" style="margin-right: 1em">不可修改</span><span class="label label-danger">不可删除</span></p>
-                <button type="button" style="margin-top: 1em;width: 40%;" class="btn btn-success  btn-lg" id="btnShowDlg">放入秘密</button>
-                <p></p>
+                <img src="img/slogo.png" />
+                <div class="row">
+                    <div class="col-md-8">
+                        <h2>不可修改</h2>
+                        <p>生活一旦记录，将永远不能删除、修改。</p>
+                        <h2>中文口令支持</h2>
+                        <p>您可以用一句话(如诗词、歌句等)作为口令,方便永久记忆。</p>
+                        <p>口令永不触网，仅在本地输入使用。</p>
+                        <h2>私密安全</h2>
+                        <p>您的钱包地址和口令是打开记录的唯一途径，请妥善保管钱包和记住口令。</p>
+                        <p>他人无法窥视。</p>
+                        <p>钱包地址和口令错误，记录无法解密。</p>
+                        <p>
+                            <a style="color: #61b015;" href="https://explorer.nebulas.io/#/address/n1prQyPucKTMnRrUG3za6Uw6XJoLbHJt1nW">合约代码</a>
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" style="margin-top: 2em;height: 4em;" class="btn btn-danger  btn-block btn-lg" id="btnInputKey">1.输入口令</button>
+                        <button type="button" style="margin-top: 2em;height: 4em;" class="btn btn-success  btn-block btn-lg" id="btnGO">2.开始记录</button>
+                    </div>
+                </div>
+
                 <div id="wallter" class="alert alert-warning" role="alert" style="display: none;">
                     <span>请先安装钱包后使用：</span>
                     <a href="https://github.com/ChengOrangeJu/WebExtensionWallet">安装钱包！</a>
                 </div>
             </div>
         </div>
-
     </div>
 
-    <div class="container">
-        <ul class="timeline" id="timeline">
-        </ul>
+
+    <div style="background-color: #f5f5f5;min-height: 500px;">
+        <div class="container">
+            <ul class="timeline" id="timeline">
+            </ul>
+        </div>
     </div>
+
+
+    <!-- 口令输入，不在网络上传播，仅保存到本地变量 -->
+    <div class="modal fade" id="keyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">口令</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form">
+                        <div class="form-group">
+                            <input id="txtKey" type="text" class="form-control" placeholder="用于加密记录，支持中文，可以输入一句易记的话...">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-success" id="btnKeyOK">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
 
     <!-- Modal -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static">
+    <div class="modal fade" id="tweetModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -107,18 +161,16 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <p class="hide" id="pError"> 
-                        <span class="label label-danger">请输入内容...</span>
-                    </p>
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary" id="btnOk">保存</button>
+                    <button type="button" class="btn btn-success" id="btnTweetOk">保存</button>
                 </div>
             </div>
         </div>
     </div>
 
 
-     <div class="modal fade" id="modalAlert" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static">
+    <!-- 记录确认 -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -129,14 +181,31 @@
                 </div>
                 <div class="modal-body">
                     <p>您确定存入本条秘密吗?</p>
-                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                    <span>存入成功将:</span>
-                    <span class="label label-danger">不可编辑</span>
-                    <span class="label label-danger">不可删除</span>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary" id="putTweetBtn">确定</button>
+                    <button type="button" class="btn btn-success" id="putTweetBtn">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 通用信息框 -->
+    <div class="modal fade" id="msgModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">消息</h4>
+                </div>
+                <div class="modal-body">
+                    <p id="txtMsg"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" data-dismiss="modal">确定</button>
                 </div>
             </div>
         </div>
@@ -144,100 +213,21 @@
 
 
 
+
     <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
     <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
     <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
     <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="http://apps.bdimg.com/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+    <script type="text/javascript" src="http://apps.bdimg.com/libs/crypto-js/3.1.2/rollups/md5.js">
+    </script>
+    <script type="text/javascript" src="js/particles.min.js"></script>
+    <script type="text/javascript" src="js/start.js"></script>
     <script src="js/nebPay.js"></script>
     <script src="js/contractApi.js"></script>
     <script src="js/template-web.js"></script>
-    <script type="text/JavaScript">       
+    <script type="text/javascript" src="js/app.js"></script>
 
-        function formatDate(unixstamp) {
-           let now = new Date(+unixstamp);
-        　　var year = now.getFullYear(),
-        　　month = now.getMonth() + 1,
-        　　date = now.getDate(),
-        　　hour = now.getHours(),
-        　　minute = now.getMinutes(),
-        　　second = now.getSeconds();        
-        　　return year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + second;
-        }
- 
-
-        $(function () {
-
-            let isExtensionExist = typeof (webExtensionWallet) !== "undefined";
-            if (!isExtensionExist) {
-                $("#wallter").show();                           
-            }else{
-                // load data...
-                let api = new HoleContractApi();
-                api.get(resp => {
-                    if (resp.result) {
-                        let tweets = JSON.parse(resp.result);
-                        if (tweets.length > 0) {
-                            tweets.sort((a, b) => a.date < b.date ? -1 : 1);
-                            let alt=0;
-                            for (const tweet of tweets) {                           
-                                tweet.sdate = formatDate(tweet.date);
-                                tweet.alt=alt;
-                                alt=alt+1;
-                                var tpl = document.getElementById('tpl').innerHTML;
-                                var html = template('tpl', tweet);
-                                $("#timeline").prepend(html);
-                            }
-                        }
-                    }
-                });
-
-                // show dlg
-                $("#btnShowDlg").click(()=>{
-                    $('#myModal').modal();
-                });
-
-
-                $("#btnOk").click(()=>{
-
-                    let text = $("#tweetText").val();
-                    text=text.replace(/(^\s*)|(\s*$)/g, "");
-                    if(text == ''){
-                        $('#pError').removeClass("hide");                      
-                        $('#pError').addClass("show");  
-                        return;
-                    }
-
-                    $('#pError').addClass("hide");                      
-                    $('#pError').removeClass("show");  
-
-
-                    $('#modalAlert').modal();                   
-                   
-
-                });
-
-
-                $("#putTweetBtn").click(()=>{
- 
-                    var tweet = {};
-                    var text = $("#tweetText").val();
-                    tweet.text = text;
-
-                    tweet.sdate = "刚刚";
-                    var html = template('tpl',tweet);
-                    
-                    $("#timeline").prepend(html);
-
-                    api.add(text);
-
-                    $('#myModal').modal('hide');
-                    $('#modalAlert').modal('hide');
-                
-                    
-                });
-            }
-        });
-    </script>
 </body>
 
 </html>
